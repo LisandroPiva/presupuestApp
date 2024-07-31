@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:namer_app/conectate.dart';
+import 'firebase_options.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -22,7 +31,9 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+
 class _HomePageState extends State<HomePage> {
+
 
   Widget _bottomAction(IconData icon){
       return InkWell(
@@ -36,7 +47,32 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context){
-    return Scaffold(
+return Scaffold(
+    body: FutureBuilder(
+      future: getCosas(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator()); // Mostrar un indicador de carga mientras se espera el resultado
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}')); // Mostrar un mensaje de error si ocurre un error
+        } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
+          return Center(child: Text('No hay datos disponibles')); // Mostrar un mensaje si no hay datos
+        } else {
+          return ListView.builder(
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, index) {
+              var item = snapshot.data?[index];
+              var nombre = item?['nombre'] ?? 'Nombre no disponible'; // Proporcionar un valor predeterminado si 'nombre' es nulo
+              var precio = item?['precio'].toString() ?? 'Precio no disponible';
+              return ListTile(
+                title: Text(nombre),
+                subtitle: Text(precio),
+              );
+            },
+          );
+        }
+      },
+    ),
       bottomNavigationBar: BottomAppBar(
         notchMargin: 8.0,
         shape: CircularNotchedRectangle(),
@@ -45,10 +81,11 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             _bottomAction(FontAwesomeIcons.chartPie),
+
             _bottomAction(FontAwesomeIcons.solidAddressBook),
             SizedBox(width: 48,),
             _bottomAction(FontAwesomeIcons.solidHeart),
-            _bottomAction(FontAwesomeIcons.cog),
+            _bottomAction(FontAwesomeIcons.gear),
           ],
         ),
       ),
@@ -61,4 +98,5 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
 }
