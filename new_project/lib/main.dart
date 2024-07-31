@@ -4,7 +4,7 @@ import 'firebase_options.dart';
 import 'package:namer_app/Pages/history.dart';
 import 'package:namer_app/Pages/home.dart';
 import 'package:namer_app/Pages/settings.dart';
-import 'package:namer_app/Pages/likedProducts.dart';
+import 'package:namer_app/Pages/liked_products.dart';
 import 'package:namer_app/Pages/stats.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
 
 class MainScreen extends StatefulWidget {
   @override
+  // ignore: library_private_types_in_public_api
   _MainScreenState createState() => _MainScreenState();
 }
 
