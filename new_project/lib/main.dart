@@ -3,9 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:namer_app/Pages/history.dart';
 import 'package:namer_app/Pages/home.dart';
-import 'package:namer_app/Pages/settings.dart';
+//import 'package:namer_app/Pages/settings.dart';
 import 'package:namer_app/Pages/liked_products.dart';
-import 'package:namer_app/Pages/stats.dart';
+//import 'package:namer_app/Pages/stats.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 void main() async {
@@ -40,8 +40,8 @@ class _MainScreenState extends State<MainScreen> {
     HomePage(),
     History(),
     Likedproducts(),
-    Settings(),
-    Stats(),
+    //Settings(),
+    //Stats(),
   ];
 
   void _onItemTapped(int index) {
@@ -50,24 +50,29 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: BarraNavegacion(
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: _pages[_selectedIndex],
+    bottomNavigationBar: Container(
+      height: 60, // Ajusta el tamaño según tus necesidades
+      child: BarraNavegacion(
         onItemTapped: _onItemTapped,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _onItemTapped(0);
-        },
-        backgroundColor: Colors.blue,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-        child: Icon(FontAwesomeIcons.houseChimney, color: Colors.black),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    );
-  }
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: () {
+        _onItemTapped(0);
+      },
+      backgroundColor: Colors.blue,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+      child: Icon(FontAwesomeIcons.houseChimney, color: Colors.black),
+    ),
+    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    resizeToAvoidBottomInset: false,
+  );
+}
+ 
 }
 
 class BarraNavegacion extends StatelessWidget {
@@ -77,6 +82,7 @@ class BarraNavegacion extends StatelessWidget {
 
   Widget _bottomAction(BuildContext context, IconData icon, int index) {
     return IconButton(
+      iconSize: 30,
       icon: FaIcon(icon),
       onPressed: () {
         onItemTapped(index);
@@ -93,11 +99,11 @@ class BarraNavegacion extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          _bottomAction(context, FontAwesomeIcons.chartPie, 4),
+          //_bottomAction(context, FontAwesomeIcons.chartPie, 4),
           _bottomAction(context, FontAwesomeIcons.solidAddressBook, 1),
-          SizedBox(width: 48,), // Espacio para el FloatingActionButton
+          SizedBox(width: 48,),
           _bottomAction(context, FontAwesomeIcons.solidHeart, 2),
-          _bottomAction(context, FontAwesomeIcons.gear, 3),
+          //_bottomAction(context, FontAwesomeIcons.gear, 3),
         ],
       ),
     );
