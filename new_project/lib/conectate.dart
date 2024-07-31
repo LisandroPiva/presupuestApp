@@ -8,8 +8,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
     CollectionReference collectionReferenceCosas = db.collection('Ingredientes');
 
     QuerySnapshot queryCosas = await collectionReferenceCosas.get();
-    queryCosas.docs.forEach((documento) {
+    for (var documento in queryCosas.docs) {
       cosas.add(documento.data());
-    });
+    }
     return cosas;
   }

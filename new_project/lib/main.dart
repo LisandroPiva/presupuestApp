@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:namer_app/conectate.dart';
 import 'firebase_options.dart';
+import 'package:namer_app/Pages/history.dart';
+import 'package:namer_app/Pages/home.dart';
+import 'package:namer_app/Pages/settings.dart';
+import 'package:namer_app/Pages/likedProducts.dart';
+import 'package:namer_app/Pages/stats.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,89 +18,87 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue
-      ),
-      home: HomePage(),
+      title: 'PresupuestApp',
+      home: MainScreen(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
+class MainScreen extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _MainScreenState createState() => _MainScreenState();
 }
 
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
 
-class _HomePageState extends State<HomePage> {
+  final List<Widget> _pages = [
+    HomePage(),
+    History(),
+    Likedproducts(),
+    Settings(),
+    Stats(),
+  ];
 
-
-  Widget _bottomAction(IconData icon){
-      return InkWell(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Icon(icon),
-        ),
-        onTap: () {},
-      );
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
-  Widget build(BuildContext context){
-return Scaffold(
-    body: FutureBuilder(
-      future: getCosas(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator()); // Mostrar un indicador de carga mientras se espera el resultado
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}')); // Mostrar un mensaje de error si ocurre un error
-        } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
-          return Center(child: Text('No hay datos disponibles')); // Mostrar un mensaje si no hay datos
-        } else {
-          return ListView.builder(
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, index) {
-              var item = snapshot.data?[index];
-              var nombre = item?['nombre'] ?? 'Nombre no disponible'; // Proporcionar un valor predeterminado si 'nombre' es nulo
-              var precio = item?['precio'].toString() ?? 'Precio no disponible';
-              return ListTile(
-                title: Text(nombre),
-                subtitle: Text(precio),
-              );
-            },
-          );
-        }
-      },
-    ),
-      bottomNavigationBar: BottomAppBar(
-        notchMargin: 8.0,
-        shape: CircularNotchedRectangle(),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            _bottomAction(FontAwesomeIcons.chartPie),
-
-            _bottomAction(FontAwesomeIcons.solidAddressBook),
-            SizedBox(width: 48,),
-            _bottomAction(FontAwesomeIcons.solidHeart),
-            _bottomAction(FontAwesomeIcons.gear),
-          ],
-        ),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BarraNavegacion(
+        onItemTapped: _onItemTapped,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          _onItemTapped(0);
+        },
         backgroundColor: Colors.blue,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-        child: Icon(FontAwesomeIcons.houseChimney ,color: Colors.black),
+        child: Icon(FontAwesomeIcons.houseChimney, color: Colors.black),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+}
+
+class BarraNavegacion extends StatelessWidget {
+  final ValueChanged<int> onItemTapped;
+
+  BarraNavegacion({required this.onItemTapped});
+
+  Widget _bottomAction(BuildContext context, IconData icon, int index) {
+    return IconButton(
+      icon: FaIcon(icon),
+      onPressed: () {
+        onItemTapped(index);
+      },
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return BottomAppBar(
+      notchMargin: 8.0,
+      shape: CircularNotchedRectangle(),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          _bottomAction(context, FontAwesomeIcons.chartPie, 4),
+          _bottomAction(context, FontAwesomeIcons.solidAddressBook, 1),
+          SizedBox(width: 48,), // Espacio para el FloatingActionButton
+          _bottomAction(context, FontAwesomeIcons.solidHeart, 2),
+          _bottomAction(context, FontAwesomeIcons.gear, 3),
+        ],
+      ),
+    );
+  }
 }
