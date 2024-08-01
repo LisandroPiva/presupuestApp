@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'firebase_options.dart'; // Asegúrate de que este archivo está correctamente configurado.
 import 'package:namer_app/Pages/history.dart';
 import 'package:namer_app/Pages/home.dart';
 //import 'package:namer_app/Pages/settings.dart';
@@ -29,7 +29,6 @@ class MyApp extends StatelessWidget {
 
 class MainScreen extends StatefulWidget {
   @override
-  // ignore: library_private_types_in_public_api
   _MainScreenState createState() => _MainScreenState();
 }
 
@@ -50,29 +49,28 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: _pages[_selectedIndex],
-    bottomNavigationBar: Container(
-      height: 60, // Ajusta el tamaño según tus necesidades
-      child: BarraNavegacion(
-        onItemTapped: _onItemTapped,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: Container(
+        height: 60, // Ajusta el tamaño según tus necesidades
+        child: BarraNavegacion(
+          onItemTapped: _onItemTapped,
+        ),
       ),
-    ),
-    floatingActionButton: FloatingActionButton(
-      onPressed: () {
-        _onItemTapped(0);
-      },
-      backgroundColor: Colors.blue,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-      child: Icon(FontAwesomeIcons.houseChimney, color: Colors.black),
-    ),
-    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    resizeToAvoidBottomInset: false,
-  );
-}
- 
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _onItemTapped(0);
+        },
+        backgroundColor: Colors.blue,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+        child: Icon(FontAwesomeIcons.houseChimney, color: Colors.black),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      resizeToAvoidBottomInset: false,
+    );
+  }
 }
 
 class BarraNavegacion extends StatelessWidget {

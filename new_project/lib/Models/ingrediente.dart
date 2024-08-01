@@ -1,4 +1,4 @@
-// ingredient.dart
+
 
 class Ingredient {
   String name;
@@ -19,5 +19,4 @@ class Ingredient {
     double valor_por_cantidad = price / totalQuantity;
     return valor_por_cantidad * usedQuantity;
   }
-
 }

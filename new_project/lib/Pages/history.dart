@@ -1,69 +1,176 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Asegúrate de que esta línea sea correcta
 
 class History extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('History Page'),
-      ),
-      body: Center(
-        child: Text(
-          'Historial de presupuestados',
-          style: TextStyle(fontSize: 24), // Puedes ajustar el tamaño del texto según sea necesario
+        title: Center(
+          child: Text(
+            'Historial',
+            textAlign: TextAlign.center,
+          ),
         ),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('products')
+            .where('userId', isEqualTo: userId) // Filtrar productos por userId
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(child: CircularProgressIndicator());
+          }
+          final products = snapshot.data!.docs;
+          return ListView.builder(
+            itemCount: products.length,
+            itemBuilder: (context, index) {
+              final product = products[index];
+              final productName = product['name']; // Obtén el nombre del producto desde el campo 'name'
+              return ListTile(
+                title: Text(productName),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => IngredientListPage(productId: product.id),
+                    ),
+                  );
+                },
+                trailing: IconButton(
+                  icon: Icon(Icons.delete, color: Colors.red),
+                  onPressed: () {
+                    _showDeleteConfirmationDialog(context, product.id);
+                  },
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
+
+  void _showDeleteConfirmationDialog(BuildContext context, String productId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Advertencia'),
+          content: Text('¿Estás seguro de que quieres eliminar el producto?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteProduct(context, productId);
+              },
+              child: Text('Borrar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteProduct(BuildContext context, String productId) {
+    FirebaseFirestore.instance
+        .collection('products')
+        .doc(productId)
+        .delete()
+        .then((_) {
+      Navigator.of(context).pop(); // Close the dialog
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Producto borrado')));
+    }).catchError((error) {
+      Navigator.of(context).pop(); // Close the dialog
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al eliminar producto: $error')));
+    });
+  }
 }
 
+class IngredientListPage extends StatelessWidget {
+  final String productId; // ID del producto
 
+  IngredientListPage({required this.productId});
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Home Page'),
-//       ),
-//       body: FutureBuilder(
-//         future: getCosas(),
-//         builder: (context, snapshot) {
-//           if (snapshot.connectionState == ConnectionState.waiting) {
-//             return Center(child: CircularProgressIndicator()); // Mostrar un indicador de carga mientras se espera el resultado
-//           } else if (snapshot.hasError) {
-//             return Center(child: Text('Error: ${snapshot.error}')); // Mostrar un mensaje de error si ocurre un error
-//           } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
-//             return Center(child: Text('No hay datos disponibles')); // Mostrar un mensaje si no hay datos
-//           } else {
-//             return ListView.builder(
-//               itemCount: snapshot.data!.length,
-//               itemBuilder: (context, index) {
-//                 var item = snapshot.data?[index];
-//                 var nombre = item?['nombre'] ?? 'Nombre no disponible'; // Proporcionar un valor predeterminado si 'nombre' es nulo
-//                 var precio = item?['precio'].toString() ?? 'Precio no disponible';
-//                 return ListTile(
-//                   title: Text(nombre),
-//                   subtitle: Text(precio),
-//                 );
-//               },
-//             );
-//           }
-//         },
-//       ),
-//       bottomNavigationBar: BarraNavegacion(
-//         onFabPressed: () {
-//           Acciones para el FloatingActionButton
-//         },
-//       ),
-//       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-//       floatingActionButton: FloatingActionButton(
-//         onPressed: () {
-//           Acciones para el FloatingActionButton
-//         },
-//         backgroundColor: Colors.blue,
-//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-//         child: Icon(FontAwesomeIcons.houseChimney, color: Colors.black),
-//       ),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: FutureBuilder<DocumentSnapshot>(
+          future: FirebaseFirestore.instance.collection('products').doc(productId).get(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Text('Hola soy una pantalla de carga ! 😁');
+            }
+            if (snapshot.hasError) {
+              return Text('Error');
+            }
+            if (!snapshot.hasData || !snapshot.data!.exists) {
+              return Text('No hay productos');
+            }
+            final productData = snapshot.data!.data() as Map<String, dynamic>;
+            final productName = productData['name'] ?? 'Producto sin nombre';
+            return Text('Ingredientes de $productName');
+          },
+        ),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('products').doc(productId).collection('ingredients').snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(child: CircularProgressIndicator());
+          }
+          final ingredients = snapshot.data!.docs;
+          return ListView.builder(
+            itemCount: ingredients.length,
+            itemBuilder: (context, index) {
+              final ingredient = ingredients[index];
+              return ListTile(
+                title: Text(ingredient['name']),
+                subtitle: Text(
+                  'Precio: ${ingredient['price']}\nCantidad total del producto: ${ingredient['totalQuantity']}\nCantidad usada: ${ingredient['usedQuantity']}\nUnidad: ${ingredient['selectedOption']}',
+                ),
+                isThreeLine: true,
+                trailing: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.red, // Color de fondo del botón
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.delete, color: Colors.white),
+                    onPressed: () {
+                      _deleteIngredient(context, productId, ingredient.id);
+                    },
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  void _deleteIngredient(BuildContext context, String productId, String ingredientId) {
+    FirebaseFirestore.instance
+        .collection('products')
+        .doc(productId)
+        .collection('ingredients')
+        .doc(ingredientId)
+        .delete()
+        .then((_) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ingrediente borrado')));
+    }).catchError((error) {
+      print("Error al eliminar ingrediente: $error");
+    });
+  }
+}

@@ -1,6 +1,9 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Importa la librería para inputFormatters
-import 'package:namer_app/Models/ingrediente.dart'; // Importa el archivo donde está definida la clase Ingredient
+import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Asegúrate de que esta línea sea correcta
+import 'package:namer_app/Models/ingrediente.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -31,185 +34,232 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (_isProductNameSubmitted && !_areIngredientFieldsVisible)
-              Center(
-                child: Text(
-                  'Product Name: $_productName',
-                  style: TextStyle(fontSize: 20),
-                ),
-              ),
-            if (!_isProductNameSubmitted)
-              Center(
-                child: Container(
-                  width: 300,
-                  child: TextField(
-                    controller: _productController,
-                    decoration: InputDecoration(
-                      labelText: 'Product Name',
-                      border: OutlineInputBorder(),
+        child: Center(
+          child: _isProductNameSubmitted && !_areIngredientFieldsVisible
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Nombre de producto: $_productName',
+                      style: TextStyle(fontSize: 20),
                     ),
-                  ),
-                ),
-              ),
-            if (!_isProductNameSubmitted)
-              SizedBox(height: 16),
-            if (!_isProductNameSubmitted)
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _productName = _productController.text;
-                      _isProductNameSubmitted = true;
-                    });
-                  },
-                  child: Text('Save Product Name'),
-                ),
-              ),
-            if (_isProductNameSubmitted && !_areIngredientFieldsVisible)
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _areIngredientFieldsVisible = true;
-                    });
-                  },
-                  child: Text('Add Ingredients'),
-                ),
-              ),
-            if (_areIngredientFieldsVisible)
-              Column(
-                children: [
-                  SizedBox(height: 16),
-                  TextField(
-                    controller: _ingredientNameController,
-                    decoration: InputDecoration(
-                      labelText: 'Ingredient Name',
-                      border: OutlineInputBorder(),
+                    SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _areIngredientFieldsVisible = true;
+                        });
+                      },
+                      child: Text('Agregar ingrediente'),
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  TextField(
-                    controller: _ingredientPriceController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Ingredient Price',
-                      border: OutlineInputBorder(),
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  TextField(
-                    controller: _ingredientTotalQuantityController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Total Quantity',
-                      border: OutlineInputBorder(),
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  TextField(
-                    controller: _ingredientUsedQuantityController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Used Quantity',
-                      border: OutlineInputBorder(),
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  DropdownButton<String>(
-                    value: _selectedOption,
-                    hint: Text('Select Unit'),
-                    items: _options.map((String option) {
-                      return DropdownMenuItem<String>(
-                        value: option,
-                        child: Text(option),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedOption = newValue;
-                      });
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _ingredients.add(
-                          Ingredient(
-                            name: _ingredientNameController.text,
-                            price: double.tryParse(_ingredientPriceController.text) ?? 0,
-                            totalQuantity: double.tryParse(_ingredientTotalQuantityController.text) ?? 0,
-                            usedQuantity: double.tryParse(_ingredientUsedQuantityController.text) ?? 0,
-                            selectedOption: _selectedOption ?? 'None',
-                          ),
-                        );
-                        _areIngredientFieldsVisible = false;
-                        // Limpiar campos y opciones después de guardar
-                        _ingredientNameController.clear();
-                        _ingredientPriceController.clear();
-                        _ingredientTotalQuantityController.clear();
-                        _ingredientUsedQuantityController.clear();
-                        _selectedOption = null;
-                      });
-                    },
-                    child: Text('Save Ingredient Info'),
-                  ),
-                  SizedBox(height: 16),
-                 ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _areIngredientFieldsVisible = false;
-                        // Limpiar campos y opciones al volver al estado anterior
-                        _ingredientNameController.clear();
-                        _ingredientPriceController.clear();
-                        _ingredientTotalQuantityController.clear();
-                        _ingredientUsedQuantityController.clear();
-                        _selectedOption = null;
-                      });
-                    },
-                    child: Text('Cancel'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey, // Color de fondo del botón de cancelar
-                    ),
-                  ),
-                ],
-              ),
-            if (!_areIngredientFieldsVisible && _ingredients.isNotEmpty)
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _ingredients.length,
-                  itemBuilder: (context, index) {
-                    final ingredient = _ingredients[index];
-                    return ListTile(
-                      title: Text(ingredient.name),
-                      subtitle: Text(
-                        'Price: ${ingredient.price}\nTotal Quantity: ${ingredient.totalQuantity}\nUsed Quantity: ${ingredient.usedQuantity}\nUnit: ${ingredient.selectedOption}',
+                    if (_ingredients.isNotEmpty)
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: _ingredients.length,
+                          itemBuilder: (context, index) {
+                            final ingredient = _ingredients[index];
+                            return ListTile(
+                              title: Text(ingredient.name),
+                              subtitle: Text(
+                                'Precio: ${ingredient.price}\nCantidad total: ${ingredient.totalQuantity}\nCantidad usada: ${ingredient.usedQuantity}\nUnidad: ${ingredient.selectedOption}',
+                              ),
+                              isThreeLine: true,
+                              trailing: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.red, // Color de fondo del botón
+                                  shape: BoxShape.circle,
+                                ),
+                                child: IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.white),
+                                  onPressed: () => _deleteIngredient(index),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                      isThreeLine: true,
-                    );
-                  },
+                  ],
+                )
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (!_isProductNameSubmitted)
+                      Container(
+                        width: 300,
+                        child: TextField(
+                          controller: _productController,
+                          decoration: InputDecoration(
+                            labelText: 'Nombre de producto',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ),
+                    if (!_isProductNameSubmitted)
+                      SizedBox(height: 16),
+                    if (!_isProductNameSubmitted)
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _productName = _productController.text;
+                            _isProductNameSubmitted = true;
+                          });
+                        },
+                        child: Text('Guardar'),
+                      ),
+                    if (_areIngredientFieldsVisible)
+                      ...[
+                        SizedBox(height: 16),
+                        TextField(
+                          controller: _ingredientNameController,
+                          decoration: InputDecoration(
+                            labelText: 'Nombre de ingrediente',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        TextField(
+                          controller: _ingredientPriceController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: 'Precio de ingrediente',
+                            border: OutlineInputBorder(),
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                        ),
+                        SizedBox(height: 16),
+                        TextField(
+                          controller: _ingredientTotalQuantityController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: 'Cantidad total',
+                            border: OutlineInputBorder(),
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                        ),
+                        SizedBox(height: 16),
+                        TextField(
+                          controller: _ingredientUsedQuantityController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: 'Cantidad usada',
+                            border: OutlineInputBorder(),
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                        ),
+                        SizedBox(height: 16),
+                        DropdownButton<String>(
+                          value: _selectedOption,
+                          hint: Text('Seleccionar unidad de medida'),
+                          items: _options.map((String option) {
+                            return DropdownMenuItem<String>(
+                              value: option,
+                              child: Text(option),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedOption = newValue;
+                            });
+                          },
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _addIngredientToFirestore,
+                          child: Text('Guardar'),
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _areIngredientFieldsVisible = false;
+                              // Limpiar campos y opciones al volver al estado anterior
+                              _ingredientNameController.clear();
+                              _ingredientPriceController.clear();
+                              _ingredientTotalQuantityController.clear();
+                              _ingredientUsedQuantityController.clear();
+                              _selectedOption = null;
+                            });
+                          },
+                          child: Text('Cancelar'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey, // Color de fondo del botón de cancelar
+                          ),
+                        ),
+                      ],
+                  ],
                 ),
-              ),
-          ],
         ),
       ),
     );
   }
+
+  void _addIngredientToFirestore() async {
+    final ingredient = Ingredient(
+      name: _ingredientNameController.text,
+      price: double.tryParse(_ingredientPriceController.text) ?? 0,
+      totalQuantity: double.tryParse(_ingredientTotalQuantityController.text) ?? 0,
+      usedQuantity: double.tryParse(_ingredientUsedQuantityController.text) ?? 0,
+      selectedOption: _selectedOption ?? 'None',
+    );
+
+    final userId = FirebaseAuth.instance.currentUser?.uid; // Obtén la ID del usuario actual
+    final productId = FirebaseFirestore.instance.collection('products').doc().id; // Genera una ID única para el producto
+
+    await FirebaseFirestore.instance.collection('products').doc(productId).set({
+      'name': _productName,
+      'userId': userId, // Agrega la ID del usuario al documento del producto
+    }).catchError((error) {
+      print("Fallo al añadir producto: $error");
+    });
+
+    FirebaseFirestore.instance.collection('products').doc(productId).collection('ingredients').add({
+      'name': ingredient.name,
+      'price': ingredient.price,
+      'totalQuantity': ingredient.totalQuantity,
+      'usedQuantity': ingredient.usedQuantity,
+      'selectedOption': ingredient.selectedOption,
+    }).then((docRef) {
+      setState(() {
+        _ingredients.add(ingredient);
+        _areIngredientFieldsVisible = false;
+        // Limpiar campos y opciones después de guardar
+        _ingredientNameController.clear();
+        _ingredientPriceController.clear();
+        _ingredientTotalQuantityController.clear();
+        _ingredientUsedQuantityController.clear();
+        _selectedOption = null;
+      });
+    }).catchError((error) {
+      print("Fallo al añadir producto: $error");
+    });
+  }
+
+  void _deleteIngredient(int index) {
+    final ingredient = _ingredients[index];
+    FirebaseFirestore.instance.collection('products').doc(_productName).collection('ingredients').where('name', isEqualTo: ingredient.name).get().then((snapshot) {
+      for (DocumentSnapshot doc in snapshot.docs) {
+        doc.reference.delete();
+      }
+      setState(() {
+        _ingredients.removeAt(index);
+      });
+    }).catchError((error) {
+      print("Fallo al añadir producto: $error");
+    });
+  }
 }
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MaterialApp(
     home: HomePage(),
   ));
