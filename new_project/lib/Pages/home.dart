@@ -1,12 +1,16 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Asegúrate de que esta línea sea correcta
 import 'package:namer_app/Models/ingrediente.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
+  final String userId;
+
+  HomePage({required this.userId});
+
   @override
+  // ignore: library_private_types_in_public_api
   _HomePageState createState() => _HomePageState();
 }
 
@@ -21,9 +25,7 @@ class _HomePageState extends State<HomePage> {
   bool _isProductNameSubmitted = false;
   bool _areIngredientFieldsVisible = false;
   List<Ingredient> _ingredients = [];
-
   String? _selectedOption;
-
   final List<String> _options = ['gramos', 'mililitros', 'unidades'];
 
   @override
@@ -67,7 +69,7 @@ class _HomePageState extends State<HomePage> {
                               isThreeLine: true,
                               trailing: Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.red, // Color de fondo del botón
+                                  color: Colors.red,
                                   shape: BoxShape.circle,
                                 ),
                                 child: IconButton(
@@ -86,7 +88,7 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     if (!_isProductNameSubmitted)
-                      Container(
+                      SizedBox(
                         width: 300,
                         child: TextField(
                           controller: _productController,
@@ -188,10 +190,10 @@ class _HomePageState extends State<HomePage> {
                               _selectedOption = null;
                             });
                           },
-                          child: Text('Cancelar'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey, // Color de fondo del botón de cancelar
+                            backgroundColor: Colors.grey,
                           ),
+                          child: Text('Cancelar'),
                         ),
                       ],
                   ],
@@ -210,12 +212,11 @@ class _HomePageState extends State<HomePage> {
       selectedOption: _selectedOption ?? 'None',
     );
 
-    final userId = FirebaseAuth.instance.currentUser?.uid; // Obtén la ID del usuario actual
-    final productId = FirebaseFirestore.instance.collection('products').doc().id; // Genera una ID única para el producto
+    final productId = FirebaseFirestore.instance.collection('products').doc().id;
 
     await FirebaseFirestore.instance.collection('products').doc(productId).set({
       'name': _productName,
-      'userId': userId, // Agrega la ID del usuario al documento del producto
+      'userId': widget.userId,
     }).catchError((error) {
       print("Fallo al añadir producto: $error");
     });
@@ -230,7 +231,6 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _ingredients.add(ingredient);
         _areIngredientFieldsVisible = false;
-        // Limpiar campos y opciones después de guardar
         _ingredientNameController.clear();
         _ingredientPriceController.clear();
         _ingredientTotalQuantityController.clear();
@@ -252,15 +252,7 @@ class _HomePageState extends State<HomePage> {
         _ingredients.removeAt(index);
       });
     }).catchError((error) {
-      print("Fallo al añadir producto: $error");
+      print("Fallo al eliminar ingrediente: $error");
     });
   }
-}
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(MaterialApp(
-    home: HomePage(),
-  ));
 }

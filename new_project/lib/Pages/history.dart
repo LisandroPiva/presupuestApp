@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Asegúrate de que esta línea sea correcta
 
 class History extends StatelessWidget {
+  final String userId;
+
+  History({required this.userId});
+
   @override
   Widget build(BuildContext context) {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-
     return Scaffold(
       appBar: AppBar(
         title: Center(
@@ -17,10 +18,7 @@ class History extends StatelessWidget {
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('products')
-            .where('userId', isEqualTo: userId) // Filtrar productos por userId
-            .snapshots(),
+        stream: FirebaseFirestore.instance.collection('products').where('userId', isEqualTo: userId).snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
@@ -30,7 +28,7 @@ class History extends StatelessWidget {
             itemCount: products.length,
             itemBuilder: (context, index) {
               final product = products[index];
-              final productName = product['name']; // Obtén el nombre del producto desde el campo 'name'
+              final productName = product['name'];
               return ListTile(
                 title: Text(productName),
                 onTap: () {
@@ -97,7 +95,7 @@ class History extends StatelessWidget {
 }
 
 class IngredientListPage extends StatelessWidget {
-  final String productId; // ID del producto
+  final String productId;
 
   IngredientListPage({required this.productId});
 
@@ -142,7 +140,7 @@ class IngredientListPage extends StatelessWidget {
                 isThreeLine: true,
                 trailing: Container(
                   decoration: BoxDecoration(
-                    color: Colors.red, // Color de fondo del botón
+                    color: Colors.red,
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
@@ -170,7 +168,7 @@ class IngredientListPage extends StatelessWidget {
         .then((_) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ingrediente borrado')));
     }).catchError((error) {
-      print("Error al eliminar ingrediente: $error");
+      print("Error al eliminar producto: $error");
     });
   }
 }

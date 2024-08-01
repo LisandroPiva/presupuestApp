@@ -15,8 +15,9 @@ class Ingredient {
     required this.selectedOption,
   });
 
+  // ignore: non_constant_identifier_names
   double monto_gastado(){
-    double valor_por_cantidad = price / totalQuantity;
-    return valor_por_cantidad * usedQuantity;
+    double valorPorCantidad = price / totalQuantity;
+    return valorPorCantidad * usedQuantity;
   }
 }
