@@ -30,7 +30,7 @@ class History extends StatelessWidget {
               final product = products[index];
               final productName = product['name'];
               return ListTile(
-                title: Text(productName),
+                title: Text(productName,style: TextStyle(fontSize: 30)),
                 onTap: () {
                   Navigator.push(
                     context,
@@ -40,7 +40,7 @@ class History extends StatelessWidget {
                   );
                 },
                 trailing: IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red),
+                  icon: Icon(Icons.delete, color: Colors.red,size: 30,),
                   onPressed: () {
                     _showDeleteConfirmationDialog(context, product.id);
                   },
@@ -59,7 +59,7 @@ class History extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Advertencia'),
-          content: Text('¿Estás seguro de que quieres eliminar el producto?'),
+          content: Text('¿Estás seguro de que quieres eliminar el producto y todos sus ingredientes?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -80,17 +80,31 @@ class History extends StatelessWidget {
   }
 
   void _deleteProduct(BuildContext context, String productId) {
+    // Primero, eliminamos todos los ingredientes del producto
     FirebaseFirestore.instance
         .collection('products')
         .doc(productId)
-        .delete()
+        .collection('ingredients')
+        .get()
+        .then((snapshot) {
+          final batch = FirebaseFirestore.instance.batch();
+          for (final doc in snapshot.docs) {
+            batch.delete(doc.reference);
+          }
+          return batch.commit();
+        })
         .then((_) {
-      Navigator.of(context).pop(); // Close the dialog
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Producto borrado')));
-    }).catchError((error) {
-      Navigator.of(context).pop(); // Close the dialog
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al eliminar producto: $error')));
-    });
+          // Luego, eliminamos el producto
+          return FirebaseFirestore.instance.collection('products').doc(productId).delete();
+        })
+        .then((_) {
+          Navigator.of(context).pop(); // Cierra el diálogo
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Producto y todos sus ingredientes borrados')));
+        })
+        .catchError((error) {
+          Navigator.of(context).pop(); // Cierra el diálogo
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al eliminar producto: $error')));
+        });
   }
 }
 
@@ -168,7 +182,7 @@ class IngredientListPage extends StatelessWidget {
         .then((_) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ingrediente borrado')));
     }).catchError((error) {
-      print("Error al eliminar producto: $error");
+      print("Error al eliminar ingrediente: $error");
     });
   }
 }
