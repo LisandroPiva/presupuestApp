@@ -29,8 +29,34 @@ class History extends StatelessWidget {
             itemBuilder: (context, index) {
               final product = products[index];
               final productName = product['name'];
+              final liked = product['liked'] ?? false; // Obtener el valor del campo 'liked'
               return ListTile(
-                title: Text(productName,style: TextStyle(fontSize: 30)),
+                title: Text(productName, style: TextStyle(fontSize: 30)),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        liked ? Icons.favorite : Icons.favorite_border,
+                        color: liked ? Colors.red : Colors.grey,
+                        size: 30,
+                      ),
+                      onPressed: () {
+                        _toggleLike(product.id, liked);
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                        size: 30,
+                      ),
+                      onPressed: () {
+                        _showDeleteConfirmationDialog(context, product.id);
+                      },
+                    ),
+                  ],
+                ),
                 onTap: () {
                   Navigator.push(
                     context,
@@ -39,18 +65,20 @@ class History extends StatelessWidget {
                     ),
                   );
                 },
-                trailing: IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red,size: 30,),
-                  onPressed: () {
-                    _showDeleteConfirmationDialog(context, product.id);
-                  },
-                ),
               );
             },
           );
         },
       ),
     );
+  }
+
+  void _toggleLike(String productId, bool isLiked) {
+    FirebaseFirestore.instance.collection('products').doc(productId).update({
+      'liked': !isLiked,
+    }).catchError((error) {
+      print("Error al actualizar el estado de 'like': $error");
+    });
   }
 
   void _showDeleteConfirmationDialog(BuildContext context, String productId) {
@@ -69,6 +97,7 @@ class History extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
+                Navigator.of(context).pop(); // Cierra el diálogo
                 _deleteProduct(context, productId);
               },
               child: Text('Borrar'),
@@ -98,11 +127,9 @@ class History extends StatelessWidget {
           return FirebaseFirestore.instance.collection('products').doc(productId).delete();
         })
         .then((_) {
-          Navigator.of(context).pop(); // Cierra el diálogo
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Producto y todos sus ingredientes borrados')));
         })
         .catchError((error) {
-          Navigator.of(context).pop(); // Cierra el diálogo
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al eliminar producto: $error')));
         });
   }

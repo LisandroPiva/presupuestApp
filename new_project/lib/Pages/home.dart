@@ -119,8 +119,6 @@ class _HomePageState extends State<HomePage> {
                           ),
                           SizedBox(height: 16),
                         ],
-
-
                     ],
                   )
                 : Column(
@@ -251,6 +249,7 @@ class _HomePageState extends State<HomePage> {
     await productRef.set({
       'name': _productName,
       'userId': widget.userId,
+      'liked': false, // Inicializar el campo 'liked' en false
     }).catchError((error) {
       print("Fallo al añadir producto: $error");
     });

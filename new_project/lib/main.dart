@@ -81,7 +81,7 @@ class _MainScreenState extends State<MainScreen> {
             _pages = [
               HomePage(userId: userId),
               History(userId: userId),
-              Likedproducts(),
+              LikedProducts(userId: userId),
               //Settings(),
               //Stats(),
             ];
