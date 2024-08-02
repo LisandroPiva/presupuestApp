@@ -20,4 +20,6 @@ class Ingredient {
     double valorPorCantidad = price / totalQuantity;
     return valorPorCantidad * usedQuantity;
   }
+
+  
 }

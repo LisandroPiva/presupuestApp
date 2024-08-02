@@ -28,8 +28,9 @@ class History extends StatelessWidget {
             itemCount: products.length,
             itemBuilder: (context, index) {
               final product = products[index];
-              final productName = product['name'];
-              final liked = product['liked'] ?? false; // Obtener el valor del campo 'liked'
+              final productData = product.data() as Map<String, dynamic>?; // Asegúrate de que product.data() no sea nulo
+              final productName = productData?['name'] ?? 'Producto sin nombre'; // Manejo seguro del nombre del producto
+              final liked = productData != null && productData.containsKey('liked') ? productData['liked'] : false; // Manejo seguro del campo 'liked'
               return ListTile(
                 title: Text(productName, style: TextStyle(fontSize: 30)),
                 trailing: Row(
@@ -108,30 +109,29 @@ class History extends StatelessWidget {
     );
   }
 
-  void _deleteProduct(BuildContext context, String productId) {
-    // Primero, eliminamos todos los ingredientes del producto
-    FirebaseFirestore.instance
-        .collection('products')
-        .doc(productId)
-        .collection('ingredients')
-        .get()
-        .then((snapshot) {
-          final batch = FirebaseFirestore.instance.batch();
-          for (final doc in snapshot.docs) {
-            batch.delete(doc.reference);
-          }
-          return batch.commit();
-        })
-        .then((_) {
-          // Luego, eliminamos el producto
-          return FirebaseFirestore.instance.collection('products').doc(productId).delete();
-        })
-        .then((_) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Producto y todos sus ingredientes borrados')));
-        })
-        .catchError((error) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al eliminar producto: $error')));
-        });
+  Future<void> _deleteProduct(BuildContext context, String productId) async {
+    try {
+      // Primero, eliminamos todos los ingredientes del producto
+      final snapshot = await FirebaseFirestore.instance
+          .collection('products')
+          .doc(productId)
+          .collection('ingredients')
+          .get();
+      final batch = FirebaseFirestore.instance.batch();
+      for (final doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+      // Luego, eliminamos el producto
+      await FirebaseFirestore.instance.collection('products').doc(productId).delete();
+      if (context.mounted) { // Verifica si el context está montado antes de mostrar el SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Producto y todos sus ingredientes borrados')));
+      }
+    } catch (error) {
+      if (context.mounted) { // Verifica si el context está montado antes de mostrar el SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al eliminar producto: $error')));
+      }
+    }
   }
 }
 
@@ -176,7 +176,7 @@ class IngredientListPage extends StatelessWidget {
               return ListTile(
                 title: Text(ingredient['name']),
                 subtitle: Text(
-                  'Precio: ${ingredient['price']}\nCantidad total del producto: ${ingredient['totalQuantity']}\nCantidad usada: ${ingredient['usedQuantity']}\nUnidad: ${ingredient['selectedOption']}',
+                  'Costo: ${ingredient['price']}\nCantidad total del producto: ${ingredient['totalQuantity']}\nCantidad usada: ${ingredient['usedQuantity']}\nUnidad: ${ingredient['selectedOption']}',
                 ),
                 isThreeLine: true,
                 trailing: Container(
@@ -207,7 +207,9 @@ class IngredientListPage extends StatelessWidget {
         .doc(ingredientId)
         .delete()
         .then((_) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ingrediente borrado')));
+      if (context.mounted) { // Verifica si el context está montado antes de mostrar el SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ingrediente borrado')));
+      }
     }).catchError((error) {
       print("Error al eliminar ingrediente: $error");
     });

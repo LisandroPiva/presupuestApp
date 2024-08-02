@@ -27,6 +27,17 @@ class _HomePageState extends State<HomePage> {
   final List<String> _options = ['gramos', 'mililitros', 'unidades'];
   String? _productId; // Variable para almacenar el ID del producto
 
+  double get _totalPrice {
+    return _ingredients.fold(0, (sum, ingredient) => sum + ingredient.price);
+  }
+
+  double get _totalUsedPrice {
+    return _ingredients.fold(0, (sum, ingredient) {
+      final unitPrice = ingredient.price / ingredient.totalQuantity; // Precio por unidad
+      return sum + (unitPrice * ingredient.usedQuantity); // Costo de la cantidad usada
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,7 +81,7 @@ class _HomePageState extends State<HomePage> {
                               ],
                             ),
                             child: SizedBox(
-                              height: 550, // Ajusta la altura según sea necesario
+                              height: 450, // Ajusta la altura según sea necesario
                               child: ListView.builder(
                                 padding: EdgeInsets.all(8.0), // Añade un poco de padding interno
                                 itemCount: _ingredients.length,
@@ -115,6 +126,25 @@ class _HomePageState extends State<HomePage> {
                                   );
                                 },
                               ),
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          // Mostrar el precio total y el precio usado aquí
+                          Align(
+                            alignment: Alignment.bottomLeft,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Precio total: \$${_totalPrice.toStringAsFixed(2)}',
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Gastado en ingredientes usados: \$${_totalUsedPrice.toStringAsFixed(2)}',
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                              ],
                             ),
                           ),
                           SizedBox(height: 16),
