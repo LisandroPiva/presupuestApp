@@ -14,64 +14,86 @@ class History extends StatelessWidget {
           child: Text(
             'Historial',
             textAlign: TextAlign.center,
+            style: TextStyle(color: Color(0xffd9ebe9))
           ),
         ),
+        backgroundColor: Color(0xff0e1821),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('products').where('userId', isEqualTo: userId).snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          }
-          final products = snapshot.data!.docs;
-          return ListView.builder(
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              final product = products[index];
-              final productData = product.data() as Map<String, dynamic>?;
-              final productName = productData?['name'] ?? 'Producto sin nombre';
-              final liked = productData != null && productData.containsKey('liked') ? productData['liked'] : false;
+      body: Container(
+  color: Color(0xff798f8c), // Fondo para el body
+  child: StreamBuilder<QuerySnapshot>(
+    stream: FirebaseFirestore.instance
+        .collection('products')
+        .where('userId', isEqualTo: userId)
+        .snapshots(),
+    builder: (context, snapshot) {
+      if (!snapshot.hasData) {
+        return Center(child: CircularProgressIndicator());
+      }
+      final products = snapshot.data!.docs;
+      return ListView.builder(
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          final product = products[index];
+          final productData = product.data() as Map<String, dynamic>?;
+          final productName = productData?['name'] ?? 'Producto sin nombre';
+          final liked = productData != null && productData.containsKey('liked') ? productData['liked'] : false;
 
-              return ListTile(
-                title: Text(productName, style: TextStyle(fontSize: 30)),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        liked ? Icons.favorite : Icons.favorite_border,
-                        color: liked ? Colors.red : Colors.grey,
-                        size: 30,
-                      ),
-                      onPressed: () {
-                        _toggleLike(product.id, liked);
-                      },
+          return Container(
+             // Padding a los costados
+            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12), // Margen entre los elementos
+            decoration: BoxDecoration(
+              color: Color(0xff44535E), // Fondo azul para cada elemento de la lista
+              borderRadius: BorderRadius.circular(12.0), // Borde redondeado
+            ),
+            child: ListTile(
+              title: Text(
+                productName,
+                style: TextStyle(fontSize: 30, color: Colors.white), // Color del texto
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      liked ? Icons.favorite : Icons.favorite_border,
+                      color: liked ? Color(0xffFF4760) : Colors.white,
+                      size: 30,
                     ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.delete,
-                        color: Colors.red,
-                        size: 30,
-                      ),
-                      onPressed: () {
-                        _showDeleteConfirmationDialog(context, product.id);
-                      },
+                    onPressed: () {
+                      _toggleLike(product.id, liked);
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.delete,
+                      color: Color(0xff19222d),
+                      size: 30,
                     ),
-                  ],
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => IngredientListPage(productId: product.id),
-                    ),
-                  );
-                },
-              );
-            },
+                    onPressed: () {
+                      _showDeleteConfirmationDialog(context, product.id);
+                    },
+                  ),
+                ],
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => IngredientListPage(productId: product.id),
+                  ),
+                );
+              },
+            ),
           );
         },
-      ),
+      );
+    },
+  ),
+),
+
+
+
     );
   }
 
@@ -159,7 +181,7 @@ class _IngredientListPageState extends State<IngredientListPage> {
     return totalBasePrice + (totalBasePrice * percentage / 100);
   }
 
-  double _calculateGanancia (double precioConGanancia, double precioSinGanancia){
+  double _calculateGanancia(double precioConGanancia, double precioSinGanancia) {
     return precioConGanancia - precioSinGanancia;
   }
 
@@ -171,7 +193,7 @@ class _IngredientListPageState extends State<IngredientListPage> {
           future: FirebaseFirestore.instance.collection('products').doc(widget.productId).get(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Text('Hola soy una pantalla de carga ! 😁');
+              return Text('Cargando...');
             }
             if (snapshot.hasError) {
               return Text('Error');
@@ -184,100 +206,123 @@ class _IngredientListPageState extends State<IngredientListPage> {
             return Text('Ingredientes de $productName');
           },
         ),
+        backgroundColor: Color(0xff0e1821), // Cambia el color de fondo del AppBar
+        titleTextStyle: TextStyle(color: Colors.white, fontSize: 22), // Cambia el color del texto del AppBar
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white), // Flecha de retroceso blanca
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _percentageController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Ingrese el porcentaje de ganancia',
-                      border: OutlineInputBorder(),
+      body: Container(
+        color: Color(0xff798f8c), // Fondo negro para el body
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _percentageController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Ingrese el porcentaje de ganancia',
+                        border: OutlineInputBorder(),
+                        labelStyle: TextStyle(color: Colors.white), // Color de la etiqueta
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white), // Color del borde cuando está enfocado
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white), // Color del borde cuando está habilitado
+                        ),
+                      ),
+                      style: TextStyle(color: Colors.white), // Color del texto
+                      onChanged: (value) {
+                        setState(() {});
+                      },
                     ),
-                    onChanged: (value) {
-                      setState(() {});
-                    },
                   ),
-                ),
-                SizedBox(width: 10),
-              ],
+                  SizedBox(width: 10),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('products').doc(widget.productId).collection('ingredients').snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                final ingredients = snapshot.data!.docs;
-                final totalBasePrice = _calculateTotalPrice(ingredients);
-                final percentage = double.tryParse(_percentageController.text) ?? 0.0;
-                final totalPriceWithProfit = _calculateTotalPriceWithProfit(totalBasePrice, percentage);
-                final ganancia = _calculateGanancia(totalPriceWithProfit, totalBasePrice);
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('products').doc(widget.productId).collection('ingredients').snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  final ingredients = snapshot.data!.docs;
+                  final totalBasePrice = _calculateTotalPrice(ingredients);
+                  final percentage = double.tryParse(_percentageController.text) ?? 0.0;
+                  final totalPriceWithProfit = _calculateTotalPriceWithProfit(totalBasePrice, percentage);
+                  final ganancia = _calculateGanancia(totalPriceWithProfit, totalBasePrice);
 
-                return Column(
-                  children: [
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: ingredients.length,
-                        itemBuilder: (context, index) {
-                          final ingredient = ingredients[index];
-                          return ListTile(
-                            title: Text(ingredient['name']),
-                            subtitle: Text(
-                              'Costo: ${ingredient['price']}\nCantidad total del producto: ${ingredient['totalQuantity']}\nCantidad usada: ${ingredient['usedQuantity']}\nUnidad: ${ingredient['selectedOption']}',
-                            ),
-                            isThreeLine: true,
-                            trailing: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: ingredients.length,
+                          itemBuilder: (context, index) {
+                            final ingredient = ingredients[index];
+                            return ListTile(
+                              title: Text(
+                                ingredient['name'],
+                                style: TextStyle(color: Colors.white), // Color del texto
                               ),
-                              child: IconButton(
-                                icon: Icon(Icons.delete, color: Colors.white),
-                                onPressed: () {
-                                  _deleteIngredient(context, widget.productId, ingredient.id);
-                                },
+                              subtitle: Text(
+                                'Costo: ${ingredient['price']}\nCantidad total del producto: ${ingredient['totalQuantity']}\nCantidad usada: ${ingredient['usedQuantity']}\nUnidad: ${ingredient['selectedOption']}',
+                                style: TextStyle(color: Colors.white), // Color del subtítulo
                               ),
+                              isThreeLine: true,
+                              trailing: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.white),
+                                  onPressed: () {
+                                    _deleteIngredient(context, widget.productId, ingredient.id);
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Precio Tot. gastado sin ganancia: \$${totalBasePrice.toStringAsFixed(2)}',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white), // Color del texto
                             ),
-                          );
-                        },
+                            SizedBox(height: 8),
+                            Text(
+                              'Precio Tot. con ganancia: \$${totalPriceWithProfit.toStringAsFixed(2)}',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white), // Color del texto
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Ganancia: \$${ganancia.toStringAsFixed(2)}',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white), // Color del texto
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Precio Tot. gastado sin ganancia: \$${totalBasePrice.toStringAsFixed(2)}',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Precio Tot. con ganancia: \$${totalPriceWithProfit.toStringAsFixed(2)}',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Ganancia: \$${ganancia.toStringAsFixed(2)}',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
-              },
+                    ],
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

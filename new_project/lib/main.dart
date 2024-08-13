@@ -101,11 +101,11 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () {
                 _onItemTapped(0);
               },
-              backgroundColor: _selectedIndex == 0 ? Colors.red : Colors.grey,
+              backgroundColor: _selectedIndex == 0 ? Color(0xff06114B) : Colors.grey,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
               child: Icon(
                 FontAwesomeIcons.houseChimney, 
-                color: _selectedIndex == 0 ? Colors.black : Colors.black
+                color: _selectedIndex == 0 ? Color(0xffd9ebe9) : Colors.black
               ),
             ),
             floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -142,7 +142,7 @@ class BarraNavegacion extends StatelessWidget {
 @override
 Widget build(BuildContext context) {
   return Container(
-    color: Color(0xff44535e), // Color rosa para el área del notch
+    color: Color(0xff798f8c), // Color rosa para el área del notch
     child: SizedBox(
       height: kBottomNavigationBarHeight, // Altura predeterminada del BottomAppBar
       child: BottomAppBar(

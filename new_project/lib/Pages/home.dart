@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 import 'package:namer_app/Models/ingrediente.dart';
 
 class HomePage extends StatefulWidget {
@@ -43,10 +44,16 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Color(0xff44535e), // Fondo de toda la pantalla
       appBar: AppBar(
-        title: Text('Home Page'),
+        title: Text(
+          'Home Page',
+          style: TextStyle(color: Color(0xffd9ebe9)), // Color del texto en el AppBar
+        ),
         backgroundColor: Color(0xff0e1821),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Color(0xffd9ebe9), // Color del icono en el AppBar
+          ),
           onPressed: () {
             // Verifica que se pueda hacer pop
             if (Navigator.canPop(context)) {
@@ -59,12 +66,12 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       body: Container(
-        color: Color(0xff44535e), // Color de fondo del body
+        color: Color(0xff798f8c), // Color de fondo del body
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              SizedBox(height: 250), // Ajusta este valor para cambiar la distancia desde la parte superior
+              SizedBox(height: 150), // Ajusta este valor para cambiar la distancia desde la parte superior
               Expanded(
                 child: SingleChildScrollView(
                   child: Center(
@@ -75,7 +82,8 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               Text(
                                 'Nombre de producto: $_productName',
-                                style: TextStyle(fontSize: 20),
+                                style:TextStyle(fontSize: 20),
+                                selectionColor: Color(0xffd9ebe9),
                               ),
                               SizedBox(height: 16),
                               ElevatedButton(
@@ -110,7 +118,7 @@ class _HomePageState extends State<HomePage> {
                                           return Container(
                                             margin: EdgeInsets.symmetric(vertical: 4.0), // Espacio entre los elementos
                                             decoration: BoxDecoration(
-                                              color: Color.fromARGB(255, 192, 152, 145), // Fondo azul para cada elemento
+                                              color: Color(0xff44535e), // Fondo azul para cada elemento
                                               borderRadius: BorderRadius.circular(8), // Bordes redondeados para los elementos
                                               boxShadow: [
                                                 BoxShadow(
@@ -125,11 +133,11 @@ class _HomePageState extends State<HomePage> {
                                               contentPadding: EdgeInsets.all(12.0), // Espacio interno del ListTile
                                               title: Text(
                                                 ingredient.name,
-                                                style: TextStyle(color: Color.fromARGB(255, 42, 8, 0)), // Texto en blanco para mejor contraste
+                                                style: TextStyle(color: Color(0xffd9ebe9)), // TITULO 
                                               ),
                                               subtitle: Text(
                                                 'Precio: ${ingredient.price}\nCantidad total: ${ingredient.totalQuantity}\nCantidad usada: ${ingredient.usedQuantity}\nUnidad: ${ingredient.selectedOption}',
-                                                style: TextStyle(color: Color.fromARGB(255, 42, 8, 0)), // Texto en blanco con opacidad
+                                                style: TextStyle(color: Color(0xffd9ebe9)), // Texto en blanco con opacidad
                                               ),
                                               isThreeLine: true,
                                               trailing: Container(
@@ -180,9 +188,21 @@ class _HomePageState extends State<HomePage> {
                                   width: 300,
                                   child: TextField(
                                     controller: _productController,
+                                    cursorColor: Color(0xffd9ebe9), // Color del cursor
+                                    style: TextStyle(color: Color(0xffd9ebe9)), // Color del texto
                                     decoration: InputDecoration(
                                       labelText: 'Nombre de producto',
-                                      border: OutlineInputBorder(),
+                                      labelStyle: TextStyle(color: Color(0xffd9ebe9)), // Color del texto de la etiqueta
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Color(0xffd9ebe9), // Color del borde cuando el campo está habilitado
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Color(0xffd9ebe9), // Color del borde cuando el campo está enfocado
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -196,87 +216,170 @@ class _HomePageState extends State<HomePage> {
                               if (_areIngredientFieldsVisible)
                                 ...[
                                   SizedBox(height: 16),
-                                  TextField(
-                                    controller: _ingredientNameController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Nombre de ingrediente',
-                                      border: OutlineInputBorder(),
+                                    TextField(
+                                      cursorColor: Color(0xffd9ebe9), // Color del cursor
+                                      style: TextStyle(color: Color(0xffd9ebe9)), // Color del texto
+                                      controller: _ingredientNameController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Nombre de ingrediente',
+                                        labelStyle: TextStyle(color: Color(0xffd9ebe9)), // Color del texto de la etiqueta
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Color(0xffd9ebe9), // Color del borde cuando el campo está habilitado
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Color(0xffd9ebe9), // Color del borde cuando el campo está enfocado
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+
                                   SizedBox(height: 16),
-                                  TextField(
-                                    controller: _ingredientPriceController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                      labelText: 'Precio de ingrediente',
-                                      border: OutlineInputBorder(),
+                                    TextField(
+                                      controller: _ingredientPriceController,
+                                      keyboardType: TextInputType.number,
+                                      cursorColor: Color(0xffd9ebe9), // Color del cursor
+                                      style: TextStyle(color: Color(0xffd9ebe9)), // Color del texto
+                                      decoration: InputDecoration(
+                                        labelText: 'Precio de ingrediente',
+                                        labelStyle: TextStyle(color: Color(0xffd9ebe9)), // Color del texto de la etiqueta
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Color(0xffd9ebe9), // Color del borde cuando el campo está habilitado
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Color(0xffd9ebe9), // Color del borde cuando el campo está enfocado
+                                          ),
+                                        ),
+                                      ),
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                      ],
                                     ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                  ),
-                                  SizedBox(height: 16),
-                                  TextField(
-                                    controller: _ingredientTotalQuantityController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                      labelText: 'Cantidad total',
-                                      border: OutlineInputBorder(),
+
+                                 SizedBox(height: 16),
+                                    TextField(
+                                      controller: _ingredientTotalQuantityController,
+                                      keyboardType: TextInputType.number,
+                                      cursorColor: Color(0xffd9ebe9), // Color del cursor
+                                      style: TextStyle(color: Color(0xffd9ebe9)), // Color del texto
+                                      decoration: InputDecoration(
+                                        labelText: 'Cantidad total',
+                                        labelStyle: TextStyle(color: Color(0xffd9ebe9)), // Color del texto de la etiqueta
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Color(0xffd9ebe9), // Color del borde cuando el campo está habilitado
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Color(0xffd9ebe9), // Color del borde cuando el campo está enfocado
+                                          ),
+                                        ),
+                                      ),
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                      ],
                                     ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                  ),
+
                                   SizedBox(height: 16),
-                                  TextField(
-                                    controller: _ingredientUsedQuantityController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                      labelText: 'Cantidad usada',
-                                      border: OutlineInputBorder(),
+                                    TextField(
+                                      controller: _ingredientUsedQuantityController,
+                                      keyboardType: TextInputType.number,
+                                      cursorColor: Color(0xffd9ebe9), // Color del cursor
+                                      style: TextStyle(color: Color(0xffd9ebe9)), // Color del texto
+                                      decoration: InputDecoration(
+                                        labelText: 'Cantidad usada',
+                                        labelStyle: TextStyle(color: Color(0xffd9ebe9)), // Color del texto de la etiqueta
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Color(0xffd9ebe9), // Color del borde cuando el campo está habilitado
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Color(0xffd9ebe9), // Color del borde cuando el campo está enfocado
+                                          ),
+                                        ),
+                                      ),
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                      ],
                                     ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                  ),
+
                                   SizedBox(height: 16),
-                                  DropdownButton<String>(
-                                    value: _selectedOption,
-                                    hint: Text('Seleccionar unidad de medida'),
-                                    items: _options.map((String option) {
-                                      return DropdownMenuItem<String>(
-                                        value: option,
-                                        child: Text(option),
-                                      );
-                                    }).toList(),
-                                    onChanged: (String? newValue) {
-                                      setState(() {
-                                        _selectedOption = newValue;
-                                      });
-                                    },
-                                  ),
+                                    DropdownButton<String>(
+                                      value: _selectedOption,
+                                      hint: Text(
+                                        'Seleccionar unidad de medida',
+                                        style: TextStyle(color: Color(0xffd9ebe9)), // Color del texto del hint
+                                      ),
+                                      items: _options.map((String option) {
+                                        return DropdownMenuItem<String>(
+                                          value: option,
+                                          child: Text(
+                                            option,
+                                            style: TextStyle(color: Color(0xffd9ebe9)), // Color del texto de cada opción
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          _selectedOption = newValue;
+                                        });
+                                      },
+                                      dropdownColor: Color(0xff0e1821), // Color de fondo del menú desplegable
+                                      iconEnabledColor: Color(0xffd9ebe9), // Color del ícono de la flecha
+                                      iconDisabledColor: Color(0xffd9ebe9), // Color del ícono de la flecha cuando está deshabilitado
+                                    ),
+
                                   SizedBox(height: 16),
                                   ElevatedButton(
-                                    onPressed: _addIngredientToFirestore,
-                                    child: Text('Guardar'),
+                                        onPressed: _addIngredientToFirestore,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Color(0xff798f8c), // Color de fondo del botón
+                                        ).copyWith(
+                                          foregroundColor: WidgetStateProperty.all(Color(0xffd9ebe9)), // Color del texto del botón
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min, // Ajusta el tamaño del botón al contenido
+                                          children: [
+                                            Icon(Icons.add, color: Color(0xffd9ebe9)), // Ícono de "+" con el color especificado
+                                            SizedBox(width: 2), // Espacio entre el ícono y el texto
+                                            Text('Guardar'), // Texto del botón
+                                          ],
+                                        ),
                                   ),
                                   SizedBox(height: 16),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _areIngredientFieldsVisible = false;
-                                        _ingredientNameController.clear();
-                                        _ingredientPriceController.clear();
-                                        _ingredientTotalQuantityController.clear();
-                                        _ingredientUsedQuantityController.clear();
-                                        _selectedOption = null;
-                                      });
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.grey,
-                                    ),
-                                    child: Text('Cancelar'),
-                                  ),
+                                    ElevatedButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            _areIngredientFieldsVisible = false;
+                                            _ingredientNameController.clear();
+                                            _ingredientPriceController.clear();
+                                            _ingredientTotalQuantityController.clear();
+                                            _ingredientUsedQuantityController.clear();
+                                            _selectedOption = null;
+                                          });
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red, // Color de fondo del botón
+                                        ).copyWith(
+                                          foregroundColor: WidgetStateProperty.all(Color(0xffd9ebe9)), // Color del texto del botón
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min, // Ajusta el tamaño del botón al contenido
+                                          children: [
+                                            Icon(Icons.delete, color: Color(0xffd9ebe9)), // Ícono de tacho de basura con el color especificado
+                                            SizedBox(width: 8), // Espacio entre el ícono y el texto
+                                            Text('Cancelar'), // Texto del botón
+                                          ],
+                                        ),
+                                      ),
                                 ],
                             ],
                           ),
