@@ -28,9 +28,10 @@ class History extends StatelessWidget {
             itemCount: products.length,
             itemBuilder: (context, index) {
               final product = products[index];
-              final productData = product.data() as Map<String, dynamic>?; // Asegúrate de que product.data() no sea nulo
-              final productName = productData?['name'] ?? 'Producto sin nombre'; // Manejo seguro del nombre del producto
-              final liked = productData != null && productData.containsKey('liked') ? productData['liked'] : false; // Manejo seguro del campo 'liked'
+              final productData = product.data() as Map<String, dynamic>?;
+              final productName = productData?['name'] ?? 'Producto sin nombre';
+              final liked = productData != null && productData.containsKey('liked') ? productData['liked'] : false;
+
               return ListTile(
                 title: Text(productName, style: TextStyle(fontSize: 30)),
                 trailing: Row(
@@ -124,28 +125,50 @@ class History extends StatelessWidget {
       await batch.commit();
       // Luego, eliminamos el producto
       await FirebaseFirestore.instance.collection('products').doc(productId).delete();
-      if (context.mounted) { // Verifica si el context está montado antes de mostrar el SnackBar
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Producto y todos sus ingredientes borrados')));
       }
     } catch (error) {
-      if (context.mounted) { // Verifica si el context está montado antes de mostrar el SnackBar
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al eliminar producto: $error')));
       }
     }
   }
 }
 
-class IngredientListPage extends StatelessWidget {
+class IngredientListPage extends StatefulWidget {
   final String productId;
 
   IngredientListPage({required this.productId});
+
+  @override
+  _IngredientListPageState createState() => _IngredientListPageState();
+}
+
+class _IngredientListPageState extends State<IngredientListPage> {
+  final TextEditingController _percentageController = TextEditingController();
+
+  double _calculateTotalPrice(List<DocumentSnapshot> ingredients) {
+    return ingredients.fold(0.0, (sum, ingredient) {
+      final price = ingredient['price'] / ingredient['totalQuantity'] * ingredient['usedQuantity']?.toDouble() ?? 0.0;
+      return sum + price;
+    });
+  }
+
+  double _calculateTotalPriceWithProfit(double totalBasePrice, double percentage) {
+    return totalBasePrice + (totalBasePrice * percentage / 100);
+  }
+
+  double _calculateGanancia (double precioConGanancia, double precioSinGanancia){
+    return precioConGanancia - precioSinGanancia;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: FutureBuilder<DocumentSnapshot>(
-          future: FirebaseFirestore.instance.collection('products').doc(productId).get(),
+          future: FirebaseFirestore.instance.collection('products').doc(widget.productId).get(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Text('Hola soy una pantalla de carga ! 😁');
@@ -162,39 +185,99 @@ class IngredientListPage extends StatelessWidget {
           },
         ),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('products').doc(productId).collection('ingredients').snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          }
-          final ingredients = snapshot.data!.docs;
-          return ListView.builder(
-            itemCount: ingredients.length,
-            itemBuilder: (context, index) {
-              final ingredient = ingredients[index];
-              return ListTile(
-                title: Text(ingredient['name']),
-                subtitle: Text(
-                  'Costo: ${ingredient['price']}\nCantidad total del producto: ${ingredient['totalQuantity']}\nCantidad usada: ${ingredient['usedQuantity']}\nUnidad: ${ingredient['selectedOption']}',
-                ),
-                isThreeLine: true,
-                trailing: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: Icon(Icons.delete, color: Colors.white),
-                    onPressed: () {
-                      _deleteIngredient(context, productId, ingredient.id);
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _percentageController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Ingrese el porcentaje de ganancia',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      setState(() {});
                     },
                   ),
                 ),
-              );
-            },
-          );
-        },
+                SizedBox(width: 10),
+              ],
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('products').doc(widget.productId).collection('ingredients').snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                final ingredients = snapshot.data!.docs;
+                final totalBasePrice = _calculateTotalPrice(ingredients);
+                final percentage = double.tryParse(_percentageController.text) ?? 0.0;
+                final totalPriceWithProfit = _calculateTotalPriceWithProfit(totalBasePrice, percentage);
+                final ganancia = _calculateGanancia(totalPriceWithProfit, totalBasePrice);
+
+                return Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: ingredients.length,
+                        itemBuilder: (context, index) {
+                          final ingredient = ingredients[index];
+                          return ListTile(
+                            title: Text(ingredient['name']),
+                            subtitle: Text(
+                              'Costo: ${ingredient['price']}\nCantidad total del producto: ${ingredient['totalQuantity']}\nCantidad usada: ${ingredient['usedQuantity']}\nUnidad: ${ingredient['selectedOption']}',
+                            ),
+                            isThreeLine: true,
+                            trailing: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              child: IconButton(
+                                icon: Icon(Icons.delete, color: Colors.white),
+                                onPressed: () {
+                                  _deleteIngredient(context, widget.productId, ingredient.id);
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Precio Tot. gastado sin ganancia: \$${totalBasePrice.toStringAsFixed(2)}',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Precio Tot. con ganancia: \$${totalPriceWithProfit.toStringAsFixed(2)}',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Ganancia: \$${ganancia.toStringAsFixed(2)}',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -207,7 +290,7 @@ class IngredientListPage extends StatelessWidget {
         .doc(ingredientId)
         .delete()
         .then((_) {
-      if (context.mounted) { // Verifica si el context está montado antes de mostrar el SnackBar
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ingrediente borrado')));
       }
     }).catchError((error) {

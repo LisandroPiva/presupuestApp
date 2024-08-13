@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'PresupuestApp',
       home: MainScreen(),
+      color: Color(0xFF44535e),
     );
   }
 }
@@ -100,11 +101,11 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () {
                 _onItemTapped(0);
               },
-              backgroundColor: _selectedIndex == 0 ? Colors.blue : Colors.grey,
+              backgroundColor: _selectedIndex == 0 ? Colors.red : Colors.grey,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
               child: Icon(
                 FontAwesomeIcons.houseChimney, 
-                color: _selectedIndex == 0 ? Colors.black : Colors.white
+                color: _selectedIndex == 0 ? Colors.black : Colors.black
               ),
             ),
             floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -138,22 +139,30 @@ class BarraNavegacion extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return BottomAppBar(
-      notchMargin: 8.0,
-      shape: CircularNotchedRectangle(),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          //_bottomAction(context, FontAwesomeIcons.chartPie, 4),
-          _bottomAction(context, FontAwesomeIcons.addressBook, 1),
-          SizedBox(width: 48,),
-          _bottomAction(context, FontAwesomeIcons.solidHeart, 2),
-          //_bottomAction(context, FontAwesomeIcons.gear, 3),
-        ],
+@override
+Widget build(BuildContext context) {
+  return Container(
+    color: Color(0xff44535e), // Color rosa para el área del notch
+    child: SizedBox(
+      height: kBottomNavigationBarHeight, // Altura predeterminada del BottomAppBar
+      child: BottomAppBar(
+        notchMargin: 8.0,
+        color: Color(0xff0e1821), // Color de fondo del BottomAppBar
+        shape: CircularNotchedRectangle(),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            //_bottomAction(context, FontAwesomeIcons.chartPie, 4),
+            _bottomAction(context, FontAwesomeIcons.addressBook, 1),
+            SizedBox(width: 48),
+            _bottomAction(context, FontAwesomeIcons.solidHeart, 2),
+            //_bottomAction(context, FontAwesomeIcons.gear, 3),
+          ],
+        ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 }
