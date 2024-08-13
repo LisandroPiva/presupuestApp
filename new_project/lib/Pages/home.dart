@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/widgets.dart';
 import 'package:namer_app/Models/ingrediente.dart';
 
 class HomePage extends StatefulWidget {
@@ -10,6 +9,7 @@ class HomePage extends StatefulWidget {
   HomePage({required this.userId});
 
   @override
+  // ignore: library_private_types_in_public_api
   _HomePageState createState() => _HomePageState();
 }
 
@@ -29,10 +29,12 @@ class _HomePageState extends State<HomePage> {
   String? _productId; // Variable para almacenar el ID del producto
 
   double get _totalPrice {
+    // ignore: avoid_types_as_parameter_names
     return _ingredients.fold(0, (sum, ingredient) => sum + ingredient.price);
   }
 
   double get _totalUsedPrice {
+    // ignore: avoid_types_as_parameter_names
     return _ingredients.fold(0, (sum, ingredient) {
       final unitPrice = ingredient.price / ingredient.totalQuantity; // Precio por unidad
       return sum + (unitPrice * ingredient.usedQuantity); // Costo de la cantidad usada
@@ -341,7 +343,7 @@ class _HomePageState extends State<HomePage> {
                                   ElevatedButton(
                                         onPressed: _addIngredientToFirestore,
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: Color(0xff798f8c), // Color de fondo del botón
+                                          backgroundColor: Color(0xff06114B), // Color de fondo del botón
                                         ).copyWith(
                                           foregroundColor: WidgetStateProperty.all(Color(0xffd9ebe9)), // Color del texto del botón
                                         ),

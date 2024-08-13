@@ -1,48 +1,150 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class LikedProducts extends StatelessWidget {
+class LikedProducts extends StatefulWidget {
   final String userId;
 
   LikedProducts({required this.userId});
 
   @override
+  _LikedProductsState createState() => _LikedProductsState();
+}
+
+class _LikedProductsState extends State<LikedProducts> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Productos Favoritos'),
+        backgroundColor: Color(0xff0e1821),
+        title: Text(
+          'Productos Favoritos',
+          style: TextStyle(color: Color(0xffd9ebe9)),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: _showSearchDialog,
+          ),
+        ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('products')
-            .where('userId', isEqualTo: userId)
-            .where('liked', isEqualTo: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          }
-          final products = snapshot.data!.docs;
-          return ListView.builder(
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              final product = products[index];
-              final productName = product['name'];
-              return ListTile(
-                title: Text(productName, style: TextStyle(fontSize: 30)),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => IngredientListPage(productId: product.id),
+      body: Container(
+        color: Color(0xff798f8c), // Color de fondo del body
+        child: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('products')
+              .where('userId', isEqualTo: widget.userId)
+              .where('liked', isEqualTo: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return Center(child: CircularProgressIndicator());
+            }
+            final products = snapshot.data!.docs.where((doc) {
+              final productName = doc['name'].toString().toLowerCase();
+              return productName.contains(_searchQuery.toLowerCase());
+            }).toList();
+
+            return ListView.builder(
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                final product = products[index];
+                final productName = product['name'];
+                return Container(
+                  // Padding a los costados
+                  margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12), // Margen entre los elementos
+                  decoration: BoxDecoration(
+                    color: Color(0xff44535E), // Fondo azul para cada elemento de la lista
+                    borderRadius: BorderRadius.circular(12.0), // Borde redondeado
+                  ),
+                  child: ListTile(
+                    title: Text(
+                      productName,
+                      style: TextStyle(fontSize: 30, color: Colors.white), // Color del texto
                     ),
-                  );
-                },
-              );
-            },
-          );
-        },
+                    trailing: IconButton(
+                      icon: Icon(
+                        Icons.favorite,
+                        color: Colors.red,
+                        size: 30,
+                      ),
+                      onPressed: () {
+                        _unlikeProduct(context, product.id);
+                      },
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => IngredientListPage(productId: product.id),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
+    );
+  }
+
+  void _unlikeProduct(BuildContext context, String productId) {
+    FirebaseFirestore.instance
+        .collection('products')
+        .doc(productId)
+        .update({'liked': false})
+        .then((_) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Producto desmarcado de favoritos')));
+        })
+        .catchError((error) {
+          print("Error al desmarcar el producto: $error");
+        });
+  }
+
+  void _showSearchDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Buscar producto'),
+          content: Container(
+            width: double.maxFinite,
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Ingrese el nombre del producto',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 20),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _searchController.clear();
+                setState(() {
+                  _searchQuery = '';
+                });
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  _searchQuery = _searchController.text;
+                });
+              },
+              child: Text('Buscar'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
