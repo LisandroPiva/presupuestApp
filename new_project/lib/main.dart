@@ -23,28 +23,25 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'PresupuestApp',
       home: MainScreen(),
-      color: Color(0xFF44535e),
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
   @override
-  // ignore: library_private_types_in_public_api
   _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  late Future<String> userIdFuture; // Para almacenar el ID del usuario
+  late Future<String> userIdFuture;
   int _selectedIndex = 0;
-
-  late List<Widget> _pages; // Define la lista de páginas
+  late List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
-    userIdFuture = _getOrCreateUserId(); // Obtén el ID del usuario al iniciar
-    _pages = []; // Inicializa _pages como una lista vacía
+    userIdFuture = _getOrCreateUserId();
+    _pages = [];
   }
 
   Future<String> _getOrCreateUserId() async {
@@ -66,6 +63,29 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  Future<bool> _onWillPop() async {
+    // Aquí puedes decidir si quieres que se cierre la aplicación o no
+    // Retorna true para permitir el retroceso, o false para bloquearlo
+    // Por ejemplo, puedes mostrar un diálogo de confirmación aquí:
+    return (await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('¿Quieres salir de PresupuestApp?'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text('Sí'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text('No'),
+              ),
+            ],
+          ),
+        )) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
@@ -78,39 +98,39 @@ class _MainScreenState extends State<MainScreen> {
         } else if (snapshot.hasData) {
           final userId = snapshot.data!;
 
-          // Inicializa _pages solo si no ha sido inicializado
           if (_pages.isEmpty) {
             _pages = [
               HomePage(userId: userId),
               History(userId: userId),
               LikedProducts(userId: userId),
-              //Settings(),
-              //Stats(),
             ];
           }
 
-          return Scaffold(
-            body: _pages[_selectedIndex],
-            bottomNavigationBar: SizedBox(
-              height: 60,
-              child: BarraNavegacion(
-                selectedIndex: _selectedIndex,
-                onItemTapped: _onItemTapped,
+          return WillPopScope(
+            onWillPop: _onWillPop,
+            child: Scaffold(
+              body: _pages[_selectedIndex],
+              bottomNavigationBar: SizedBox(
+                height: 60,
+                child: BarraNavegacion(
+                  selectedIndex: _selectedIndex,
+                  onItemTapped: _onItemTapped,
+                ),
               ),
-            ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                _onItemTapped(0);
-              },
-              backgroundColor: _selectedIndex == 0 ? Color(0xff06114B) : Colors.grey,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-              child: Icon(
-                FontAwesomeIcons.houseChimney, 
-                color: _selectedIndex == 0 ? Color(0xffd9ebe9) : Colors.black
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  _onItemTapped(0);
+                },
+                backgroundColor: _selectedIndex == 0 ? Color(0xff06114B) : Colors.grey,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                child: Icon(
+                  FontAwesomeIcons.houseChimney, 
+                  color: _selectedIndex == 0 ? Color(0xffd9ebe9) : Colors.black
+                ),
               ),
+              floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+              resizeToAvoidBottomInset: false,
             ),
-            floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-            resizeToAvoidBottomInset: false,
           );
         } else {
           return Center(child: Text('No data'));
@@ -140,30 +160,27 @@ class BarraNavegacion extends StatelessWidget {
     );
   }
 
-@override
-Widget build(BuildContext context) {
-  return Container(
-    color: Color(0xff798f8c), // Color rosa para el área del notch
-    child: SizedBox(
-      height: kBottomNavigationBarHeight, // Altura predeterminada del BottomAppBar
-      child: BottomAppBar(
-        notchMargin: 8.0,
-        color: Color(0xff0e1821), // Color de fondo del BottomAppBar
-        shape: CircularNotchedRectangle(),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            //_bottomAction(context, FontAwesomeIcons.chartPie, 4),
-            _bottomAction(context, FontAwesomeIcons.addressBook, 1),
-            SizedBox(width: 48),
-            _bottomAction(context, FontAwesomeIcons.solidHeart, 2),
-            //_bottomAction(context, FontAwesomeIcons.gear, 3),
-          ],
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Color(0xff798f8c),
+      child: SizedBox(
+        height: kBottomNavigationBarHeight,
+        child: BottomAppBar(
+          notchMargin: 8.0,
+          color: Color(0xff0e1821),
+          shape: CircularNotchedRectangle(),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              _bottomAction(context, FontAwesomeIcons.addressBook, 1),
+              SizedBox(width: 48),
+              _bottomAction(context, FontAwesomeIcons.solidHeart, 2),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }

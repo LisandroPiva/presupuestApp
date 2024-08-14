@@ -35,13 +35,13 @@ class _HistoryState extends State<History> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Buscar producto'),
+          title: Text('Buscar producto',style: TextStyle(fontSize: 22),),
           content: Container(
-            width: MediaQuery.of(context).size.width * 0.8,
-            height: 150,
+            width: 400,
+            height: 50,
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 2.0),
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
@@ -82,12 +82,9 @@ class _HistoryState extends State<History> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(
-          child: Text(
+        title: Text(
             'Historial',
-            textAlign: TextAlign.center,
             style: TextStyle(color: Color(0xffd9ebe9)),
-          ),
         ),
         backgroundColor: Color(0xff0e1821),
         actions: [
@@ -380,12 +377,14 @@ class _IngredientListPageState extends State<IngredientListPage> {
                                 ),
                                 isThreeLine: true,
                                 trailing: Container(
+                                   width: 35, // Cambia el ancho del círculo
+                                   height: 35, // Cambia la altura del círculo
                                   decoration: BoxDecoration(
                                     color: Colors.red,
                                     shape: BoxShape.circle,
                                   ),
                                   child: IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.white),
+                                    icon: Icon(Icons.delete, color: Colors.white,size: 20,),
                                     onPressed: () {
                                       _deleteIngredient(context, widget.productId, ingredient.id);
                                     },
