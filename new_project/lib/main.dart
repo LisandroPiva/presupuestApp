@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
 
 class MainScreen extends StatefulWidget {
   @override
+  // ignore: library_private_types_in_public_api
   _MainScreenState createState() => _MainScreenState();
 }
 
@@ -106,6 +107,7 @@ class _MainScreenState extends State<MainScreen> {
             ];
           }
 
+          // ignore: deprecated_member_use
           return WillPopScope(
             onWillPop: _onWillPop,
             child: Scaffold(

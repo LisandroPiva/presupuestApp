@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/link.dart';
 
 class LikedProducts extends StatefulWidget {
   final String userId;
@@ -7,6 +9,7 @@ class LikedProducts extends StatefulWidget {
   LikedProducts({required this.userId});
 
   @override
+  // ignore: library_private_types_in_public_api
   _LikedProductsState createState() => _LikedProductsState();
 }
 
@@ -24,6 +27,12 @@ class _LikedProductsState extends State<LikedProducts> {
           style: TextStyle(color: Color(0xffd9ebe9)),
         ),
         actions: [
+          IconButton(
+            icon: Icon(Icons.info),
+            onPressed: (){  _showInfoDialog(context);
+            },
+            color: Color(0xffd9ebe9),
+          ),
           IconButton(
             icon: Icon(Icons.search),
             onPressed: _showSearchDialog,
@@ -112,7 +121,7 @@ class _LikedProductsState extends State<LikedProducts> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Buscar producto'),
-          content: Container(
+          content: SizedBox(
             width: double.maxFinite,
             child: TextField(
               controller: _searchController,
@@ -148,6 +157,79 @@ class _LikedProductsState extends State<LikedProducts> {
       },
     );
   }
+
+  void _showInfoDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Información de la aplicación',style: TextStyle(color: Colors.white,fontSize: 17)),
+        backgroundColor: Color.fromARGB(255, 0, 0, 0),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              'Aplicación creada por:',
+              style: TextStyle(fontSize: 15,color: Colors.white),
+            ),
+            SizedBox(height: 15), // Espacio entre el texto y los botones
+            Link(
+              uri: Uri.parse('https://github.com/AgustinPlatun'),
+              target: LinkTarget.blank,
+              builder: (BuildContext context, FollowLink? openLink) {
+                return ElevatedButton.icon(
+                  icon: FaIcon(
+                    FontAwesomeIcons.github,
+                    color: Color(0xffd9ebe9), // Color del ícono
+                  ),
+                  label: Text(
+                    'Agustin Platun',
+                    style: TextStyle(color: Color(0xffd9ebe9)), // Color del texto
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(double.infinity, 36),
+                    backgroundColor: Color(0xff0e1821), // Fondo del botón
+                  ),
+                  onPressed: openLink,
+                );
+              },
+            ),
+            SizedBox(height: 16), // Espacio entre los botones
+            Link(
+              uri: Uri.parse('https://github.com/LisandroPiva'),
+              target: LinkTarget.blank,
+              builder: (BuildContext context, FollowLink? openLink) {
+                return ElevatedButton.icon(
+                  icon: FaIcon(
+                    FontAwesomeIcons.github,
+                    color: Color(0xffd9ebe9), // Color del ícono
+                  ),
+                  label: Text(
+                    'Lisandro Piva',
+                    style: TextStyle(color: Color(0xffd9ebe9)), // Color del texto
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(double.infinity, 36),
+                    backgroundColor: Color(0xff0e1821), // Fondo del botón
+                  ),
+                  onPressed: openLink,
+                );
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cerrar'),
+          ),
+        ],
+      );
+    },
+  );
+}
 }
 
 class IngredientListPage extends StatefulWidget {
@@ -156,6 +238,7 @@ class IngredientListPage extends StatefulWidget {
   IngredientListPage({required this.productId});
 
   @override
+  // ignore: library_private_types_in_public_api
   _IngredientListPageState createState() => _IngredientListPageState();
 }
 
@@ -163,6 +246,7 @@ class _IngredientListPageState extends State<IngredientListPage> {
   final TextEditingController _percentageController = TextEditingController();
 
   double _calculateTotalPrice(List<DocumentSnapshot> ingredients) {
+    // ignore: avoid_types_as_parameter_names
     return ingredients.fold(0.0, (sum, ingredient) {
       final price = ingredient['price'] / ingredient['totalQuantity'] * ingredient['usedQuantity']?.toDouble() ?? 0.0;
       return sum + price;
@@ -213,7 +297,7 @@ class _IngredientListPageState extends State<IngredientListPage> {
             return Text('Ingredientes de $productName');
           },
         ),
-                backgroundColor: Color(0xff0e1821),
+        backgroundColor: Color(0xff0e1821),
         titleTextStyle: TextStyle(
           color: Colors.white,
           fontSize: 22,
@@ -258,18 +342,18 @@ class _IngredientListPageState extends State<IngredientListPage> {
                 ],
               ),
             ),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('products').doc(widget.productId).collection('ingredients').snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                final ingredients = snapshot.data!.docs;
-                final totalBasePrice = _calculateTotalPrice(ingredients);
-                final percentage = double.tryParse(_percentageController.text) ?? 0.0;
-                final totalPriceWithProfit = _calculateTotalPriceWithProfit(totalBasePrice, percentage);
-                final ganancia = _calculateGanancia(totalPriceWithProfit, totalBasePrice);
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('products').doc(widget.productId).collection('ingredients').snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  final ingredients = snapshot.data!.docs;
+                  final totalBasePrice = _calculateTotalPrice(ingredients);
+                  final percentage = double.tryParse(_percentageController.text) ?? 0.0;
+                  final totalPriceWithProfit = _calculateTotalPriceWithProfit(totalBasePrice, percentage);
+                  final ganancia = _calculateGanancia(totalPriceWithProfit, totalBasePrice);
 
                   return Column(
                     children: [
@@ -299,14 +383,14 @@ class _IngredientListPageState extends State<IngredientListPage> {
                                 ),
                                 isThreeLine: true,
                                 trailing: Container(
-                                   width: 35, // Cambia el ancho del círculo
+                                  width: 35, // Cambia el ancho del círculo
                                   height: 35, // Cambia la altura del círculo
                                   decoration: BoxDecoration(
                                     color: Colors.red,
                                     shape: BoxShape.circle,
                                   ),
                                   child: IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.white,size: 20,),
+                                    icon: Icon(Icons.delete, color: Colors.white, size: 20),
                                     onPressed: () {
                                       _deleteIngredient(context, widget.productId, ingredient.id);
                                     },

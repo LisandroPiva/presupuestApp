@@ -7,6 +7,7 @@ class History extends StatefulWidget {
   History({required this.userId});
 
   @override
+  // ignore: library_private_types_in_public_api
   _HistoryState createState() => _HistoryState();
 }
 
@@ -36,7 +37,7 @@ class _HistoryState extends State<History> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Buscar producto',style: TextStyle(fontSize: 22),),
-          content: Container(
+          content: SizedBox(
             width: 400,
             height: 50,
             child: Center(
@@ -239,6 +240,7 @@ class IngredientListPage extends StatefulWidget {
   IngredientListPage({required this.productId});
 
   @override
+  // ignore: library_private_types_in_public_api
   _IngredientListPageState createState() => _IngredientListPageState();
 }
 
@@ -246,6 +248,7 @@ class _IngredientListPageState extends State<IngredientListPage> {
   final TextEditingController _percentageController = TextEditingController();
 
   double _calculateTotalPrice(List<DocumentSnapshot> ingredients) {
+    // ignore: avoid_types_as_parameter_names
     return ingredients.fold(0.0, (sum, ingredient) {
       final price = ingredient['price'] / ingredient['totalQuantity'] * ingredient['usedQuantity']?.toDouble() ?? 0.0;
       return sum + price;
@@ -380,7 +383,7 @@ class _IngredientListPageState extends State<IngredientListPage> {
                                    width: 35, // Cambia el ancho del círculo
                                    height: 35, // Cambia la altura del círculo
                                   decoration: BoxDecoration(
-                                    color: Colors.red,
+                                    color: Color(0xffFF4760),
                                     shape: BoxShape.circle,
                                   ),
                                   child: IconButton(
